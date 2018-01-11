@@ -69,7 +69,7 @@ export default {
     }
   },
   methods: {
-    timer() {
+    timer () {
       this.show   = true;
       const Timer = require('tiny-timer');
       let timer   = new Timer();
@@ -86,7 +86,7 @@ export default {
           this.startGame();
         })
     },
-    startGame() {
+    startGame () {
       console.log('GAME STARRTTTTT');
       this.showGame   = true;
       const Timer     = require('tiny-timer');
