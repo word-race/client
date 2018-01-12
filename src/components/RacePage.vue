@@ -85,43 +85,41 @@ export default {
   },
   methods: {
     timer () {
-      this.show   = true;
-      const Timer = require('tiny-timer');
-      let timer   = new Timer();
-      let time    = timer.start(11000);
+      this.show = true
+      const Timer = require('tiny-timer')
+      let timer = new Timer()
 
       timer.on('tick', (ms) => {
         this.waktu = (Math.floor(ms) / 1000).toFixed()
         console.log('tick', (Math.floor(ms) / 1000).toFixed())
       })
 
-        timer.on('tick', () => {
-          console.log('tick')
-          this.selesai = "Game Start !"
-          this.startGame();
-        })
+      timer.on('tick', () => {
+        console.log('tick')
+        this.selesai = 'Game Start !'
+        this.startGame()
+      })
     },
     startGame () {
-      console.log('GAME STARRTTTTT');
-      this.showGame   = true;
-      const Timer     = require('tiny-timer');
-      let timerStart  = new Timer();
-      let timeStart   = timerStart.start(60000);
+      console.log('GAME STARRTTTTT')
+      this.showGame = true
+      const Timer = require('tiny-timer')
+      let timerStart = new Timer()
 
       timerStart.on('tick', (ms) => {
         this.waktuStart = (Math.floor(ms) / 1000).toFixed()
         console.log('tick', (Math.floor(ms) / 1000).toFixed())
       })
 
-        timerStart.on('done', () => {
-          console.log('done!')
-          this.waktuSelesai = "Time's Up ! Game Over !"
-          this.timeout();
-        })
+      timerStart.on('done', () => {
+        console.log('done!')
+        this.waktuSelesai = "Time's Up ! Game Over !"
+        this.timeout()
+      })
     },
 
-    timeout(){
-      router.push({name : "ResultPage"})
+    timeout () {
+      router.push({name: 'ResultPage'})
     },
     playerJoin () {
       if ((this.playerName === undefined) || (this.playerName.trim() === '')) {
