@@ -253,6 +253,7 @@ export default {
     this.$fbasedb.ref('wordrace').on('value', (snapshot) => {
       console.log('INI ALL READY........',this.isAllReady, this.raceState.isStarted )
       let isStartedStatus
+      
       if (this.raceState.isStarted === undefined) {
         isStartedStatus = true
       } else {
