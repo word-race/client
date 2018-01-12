@@ -4,7 +4,7 @@ import DashboardPage from '@/components/DashboardPage'
 import WelcomePage from '@/components/WelcomePage'
 import RacePage from '@/components/RacePage'
 import LeaderPage from '@/components/LeaderPage'
-
+import Resultpage from '@/components/ResultPage'
 Vue.use(Router)
 
 export default new Router({
@@ -27,6 +27,11 @@ export default new Router({
           path: 'leaderpage',
           name: 'LeaderPage',
           component: LeaderPage
+        },
+        {
+          path: 'Resultpage',
+          name: 'Resultpage',
+          component: Resultpage
         }
       ]
     }

@@ -1,5 +1,5 @@
 <template>
-  <h1>Ladderboard page</h1>
+  <h1>Leaderboard page</h1>
 </template>
 
 <script>
