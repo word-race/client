@@ -3,8 +3,8 @@
     <div class="modal modal--congratulations">
         <div class="modal-top">
             <img class="modal-icon u-imgResponsive" src="https://dl.dropboxusercontent.com/s/e1t2hhowjcrs7f5/100daysui_100icon.png" alt="Trophy" />
-            <div class="modal-header">Congratulations</div>
-            <div class="modal-subheader">{{winnerName}} Your scores : {{winnerScore}}</div>
+            <div class="modal-header">Congratulations {{this.$route.query.winner}}</div>
+            <div class="modal-subheader">{{this.$route.query.winner}}, You score : {{this.$route.query.score}} Poin</div>
         </div>
         <v-layout class="modal-bottom" align-center wrap>
             <v-btn color="primary" v-on:click="toHome" class="rapihin">HOME</v-btn>
@@ -23,8 +23,12 @@ export default {
       winnerScore: '10'
     }
   },
+  props: [
+    'winner'
+  ],
   created () {
-
+    console.log(this.$route.query)
+    this.$fbasedb.ref('wordrace').set(null)
   },
   methods: {
     toHome: function () {

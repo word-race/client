@@ -1,20 +1,19 @@
 <template>
   <v-container>
-
-    <h1>Race Page</h1>
-    <v-layout>
-      <v-flex>Indicator </v-flex>
-      <v-flex> <h1 class="display-3">{{currentWord.word}}</h1></v-flex>
-      <v-flex>
-        <h2><button type="button" name="button" @click="timer()">START</button></h2>
-          <div v-if="show">
-            <h2>Game Start in . . . {{ waktu }}</h2>
-          </div>
-          <div class="right" v-if="showGame">
-            <h2 v-if="waktu == 0">{{ selesai }}</h2>
-            <h1>{{ waktuStart }}</h1>
-            <h1>{{waktuSelesai}}</h1>
-          </div>
+    <v-layout align-center>
+      <v-flex xs4>
+        <v-btn round color="blue" @click="timer()" style="color: white">Count Down</v-btn>
+        <div v-if="show">
+          <h3>Game Start in . . . {{ waktu }}</h3>
+        </div>  
+      </v-flex>
+        <v-flex> <h1 class="display-3">{{currentWord.word}}</h1></v-flex>
+      <v-flex xs4>
+        <div v-if="showGame">
+          <h2>{{ selesai }}</h2>
+          <h1 style="font-size: 90px">{{ waktuStart }}</h1>
+          <h1>{{ waktuSelesai }}</h1>
+        </div>
       </v-flex>
     </v-layout>
     <v-layout>
@@ -42,6 +41,7 @@
         </v-list>
       </v-flex>
     </v-layout>
+    
   </v-container>
 </template>
 
@@ -80,14 +80,19 @@ export default {
       currentWord: {
         source: this.$fbasedb.ref('randomword'),
         asObject: true
+      },
+      raceState: {
+        source: this.$fbasedb.ref('raceState'),
+        asObject: true
       }
     }
   },
   methods: {
     timer () {
-      this.show = true
-      const Timer = require('tiny-timer')
-      let timer = new Timer()
+      this.show   = true;
+      const Timer = require('tiny-timer');
+      let timer   = new Timer();
+      let time = timer.start(4000);
 
       timer.on('tick', (ms) => {
         this.waktu = (Math.floor(ms) / 1000).toFixed()
@@ -95,31 +100,11 @@ export default {
       })
 
       timer.on('tick', () => {
-        console.log('tick')
         this.selesai = 'Game Start !'
-        this.startGame()
+        if (this.waktu === 0) {
+          this.startGame()
+        }
       })
-    },
-    startGame () {
-      console.log('GAME STARRTTTTT')
-      this.showGame = true
-      const Timer = require('tiny-timer')
-      let timerStart = new Timer()
-
-      timerStart.on('tick', (ms) => {
-        this.waktuStart = (Math.floor(ms) / 1000).toFixed()
-        console.log('tick', (Math.floor(ms) / 1000).toFixed())
-      })
-
-      timerStart.on('done', () => {
-        console.log('done!')
-        this.waktuSelesai = "Time's Up ! Game Over !"
-        this.timeout()
-      })
-    },
-
-    timeout () {
-      router.push({name: 'ResultPage'})
     },
     playerJoin () {
       if ((this.playerName === undefined) || (this.playerName.trim() === '')) {
@@ -188,14 +173,62 @@ export default {
       }
     },
     startGame () {
-      console.log('game started')
+      console.log('GAME STARRRRT')
+      this.showGame = true
+      this.show = false
+      const Timer = require('tiny-timer')
+      // let timerStart = new Timer()
+      let timeNow = (new Date()).getTime()
+      let interval = this.raceState.endTime - timeNow
+      console.log(interval / 1000)
+      let timerStart = new Timer()
+      timerStart.start(interval)
+
+      timerStart.on('tick', (ms) => {
+        this.waktuStart = (Math.floor(ms) / 1000).toFixed()
+        // console.log('tick', (Math.floor(ms) / 1000).toFixed())
+        if (this.waktuStart === 50) {
+          this.waktuSelesai = `C'mon ! Try Harder !`
+        } else if (this.waktuStart === 40) {
+          this.waktuSelesai = 'You Can Do It !'
+        } else if (this.waktuStart === 30) {
+          this.waktuSelesai = `If you never say no, you'll never say yes`
+        } else if (this.waktuStart === 20) {
+          this.waktuSelesai = 'Ganbatte !'
+        } else if (this.waktuStart === 10) {
+          this.waktuSelesai = `Ten Seconds Left Man, C'mon !`
+        } else if (this.waktuStart === 3) {
+          this.waktuSelesai = `Three !`
+        } else if (this.waktuStart === 2) {
+          this.waktuSelesai = `Two !`
+        } else if (this.waktuStart === 1) {
+          this.waktuSelesai = `One !`
+        }
+      })
+      timerStart.on('done', () => {
+        // this.waktuSelesai = `Time's Up ! Game Over !`
+        this.timeout()
+      })
     },
+
+    timeout () {
+      // router.push({name: 'ResultPage'})
+      this.$fbasedb.ref('raceState').set({
+        isStarted: false,
+        endTime: null
+      })
+      console.log(this.alldata[0].name)
+      let newArr = this.alldata.sort(function(a,b) {return (a.poin < b.poin) ? 1 : ((b.poin < a.poin) ? -1 : 0);} )
+      console.log(newArr)
+      this.$router.push(`/resultpage?winner=${newArr[0].name}&score=${newArr[0].poin}`)
+      
+    },
+
     getNewText () {
       console.log('get new text')
       let inithis = this
       axios.get('http://api.wordnik.com/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&minLength=5&maxLength=15&limit=1&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5')
       .then(function (result) {
-        console.log('>>>>>>>>>', result)
         inithis.$fbasedb.ref('randomword').set({
           word: result.data[0].word.toLowerCase()
         })
@@ -214,11 +247,58 @@ export default {
       }
     }
   },
-  created () {
+  mounted () {
+
+
     this.$fbasedb.ref('wordrace').on('value', (snapshot) => {
-      console.log('HIHIHI ', snapshot.val())
-      console.log(this.isAllReady)
+      console.log('INI ALL READY........',this.isAllReady, this.raceState.isStarted )
+      let isStartedStatus
+      
+      if (this.raceState.isStarted === undefined) {
+        isStartedStatus = true
+      } else {
+        isStartedStatus = this.raceState.isStarted
+      }
+      if (this.isAllReady && !isStartedStatus) {
+        let newEndTime = new Date()
+        let newEndTimeMiliseccond = newEndTime.getTime() + 61000
+        console.log('ini end milisecond yang baru..........',newEndTimeMiliseccond)
+        this.$fbasedb.ref('raceState').set({
+          isStarted: true,
+          endTime: newEndTimeMiliseccond
+        })
+      }
     })
+
+    this.$fbasedb.ref('raceState').on('value', (snapshot) => {
+      console.log('HIHIHI2222 ')
+      // if (this.isAllReady && !this.raceState.isStarted) {
+        // let newEndTime = new Date()
+        // let newEndTimeMiliseccond = newEndTime.getTime() + 6000
+        // console.log(newEndTimeMiliseccond)
+        // this.$fbasedb.ref('raceState').set({
+        //   isStarted: true,
+        //   endTime: newEndTimeMiliseccond
+        // })
+        // .then(res => {
+      let isStartedStatus
+      if (this.raceState.isStarted === undefined) {
+        isStartedStatus = true
+      } else {
+        isStartedStatus = this.raceState.isStarted
+      }
+      if (isStartedStatus) {
+        console.log('init race state')
+        this.startGame()
+      }
+        // })
+      // }
+    })
+
+    // if (this.raceState.isStarted) {
+    //   console.log('race state karena restart')
+    //   this.startGame()
+    // }
   }
 }
 </script>

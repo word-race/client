@@ -29,9 +29,10 @@ export default new Router({
           component: LeaderPage
         },
         {
-          path: 'Resultpage',
+          path: 'resultpage',
           name: 'Resultpage',
-          component: Resultpage
+          component: Resultpage,
+          props: (route) => ({ query: route.query.q })
         }
       ]
     }
