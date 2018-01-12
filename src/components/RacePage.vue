@@ -7,7 +7,7 @@
           <h3>Game Start in . . . {{ waktu }}</h3>
         </div>  
       </v-flex>
-        <v-flex> <h1 class="display-3">{{currentWord.word}} {{isAllReady}}</h1></v-flex>
+        <v-flex> <h1 class="display-3">{{currentWord.word}}</h1></v-flex>
       <v-flex xs4>
         <div v-if="showGame">
           <h2>{{ selesai }}</h2>
@@ -105,27 +105,6 @@ export default {
           this.startGame()
         }
       })
-    },
-    startGame () {
-      console.log('GAME STARRTTTTT')
-      this.showGame = true
-      const Timer = require('tiny-timer')
-      let timerStart = new Timer()
-
-      timerStart.on('tick', (ms) => {
-        this.waktuStart = (Math.floor(ms) / 1000).toFixed()
-        console.log('tick', (Math.floor(ms) / 1000).toFixed())
-      })
-
-      timerStart.on('done', () => {
-        console.log('done!')
-        this.waktuSelesai = "Time's Up ! Game Over !"
-        this.timeout()
-      })
-    },
-
-    timeout () {
-      router.push({name: 'ResultPage'})
     },
     playerJoin () {
       if ((this.playerName === undefined) || (this.playerName.trim() === '')) {
@@ -227,7 +206,7 @@ export default {
         }
       })
       timerStart.on('done', () => {
-        this.waktuSelesai = `Time's Up ! Game Over !`
+        // this.waktuSelesai = `Time's Up ! Game Over !`
         this.timeout()
       })
     },
@@ -238,6 +217,11 @@ export default {
         isStarted: false,
         endTime: null
       })
+      console.log(this.alldata[0].name)
+      let newArr = this.alldata.sort(function(a,b) {return (a.poin < b.poin) ? 1 : ((b.poin < a.poin) ? -1 : 0);} )
+      console.log(newArr)
+      this.$router.push(`/resultpage?winner=${newArr[0].name}&score=${newArr[0].poin}`)
+      
     },
 
     getNewText () {
@@ -276,7 +260,7 @@ export default {
       }
       if (this.isAllReady && !isStartedStatus) {
         let newEndTime = new Date()
-        let newEndTimeMiliseccond = newEndTime.getTime() + 60000
+        let newEndTimeMiliseccond = newEndTime.getTime() + 61000
         console.log('ini end milisecond yang baru..........',newEndTimeMiliseccond)
         this.$fbasedb.ref('raceState').set({
           isStarted: true,
@@ -310,10 +294,10 @@ export default {
       // }
     })
 
-    if (this.raceState.isStarted) {
-      console.log('race state karena restart')
-      this.startGame()
-    }
+    // if (this.raceState.isStarted) {
+    //   console.log('race state karena restart')
+    //   this.startGame()
+    // }
   }
 }
 </script>

@@ -4,7 +4,6 @@
     <v-layout justify-center align-center>
       <v-flex md2 sm3 xs3>
         <b>{{player.name}}</b> <br>
-        <span class="caption">{{timeJoined}}</span>
       </v-flex>
       <v-spacer></v-spacer>
       <v-flex md2 sm3 xs3>

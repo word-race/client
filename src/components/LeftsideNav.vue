@@ -24,14 +24,6 @@
           <v-list-tile-title> START RACING >></v-list-tile-title>
         </v-list-tile-content>
       </v-list-tile>
-      <v-list-tile @click="gotoLeaderPage">
-        <v-list-tile-action>
-          <v-icon dark>stars</v-icon>
-        </v-list-tile-action>
-        <v-list-tile-content>
-          <v-list-tile-title>Leader Board</v-list-tile-title>
-        </v-list-tile-content>
-      </v-list-tile>
     </v-list>
   </v-navigation-drawer>
 </template>
@@ -41,14 +33,16 @@ export default {
   methods: {
     gotoWelcomePage () {
       this.$router.push({name: 'WelcomePage'})
+      // this.$router.push(`/resultpage?winner=wahib`)
     },
     gotoRacePage () {
       this.$router.push({name: 'RacePage'})
-    },
-    gotoLeaderPage () {
-      console.log('goto leader page')
-      this.$router.push({name: 'LeaderPage'})
+      localStorage.removeItem('playerName')
     }
+    // gotoLeaderPage () {
+    //   console.log('goto leader page')
+    //   this.$router.push({name: 'LeaderPage'})
+    // }
   },
   computed: {
     leftDrawer: {
