@@ -3,8 +3,8 @@
 
     <h1>Race Page</h1>
     <v-layout>
-      <v-flex>Indicator</v-flex>
-      <v-flex>{{text}}</v-flex>
+      <v-flex>Indicator </v-flex>
+      <v-flex> <h1 class="display-3">{{currentWord.word}}</h1></v-flex>
       <v-flex>
         <h2><button type="button" name="button" @click="timer()">START</button></h2>
           <div v-if="show">
@@ -32,6 +32,9 @@
         <v-btn round flat color="red" :dark="isPlayerJoin" @click="playerUnJoin" v-if="isPlayerJoin">Left</v-btn>
       </v-flex>
     </v-layout>
+    <v-layout justify-center pb-5 v-if="failMessage">
+      <span class="red--text title">{{failMessage}}</span>
+    </v-layout>
     <v-layout fluid>
       <v-flex>
         <v-list >
@@ -40,15 +43,12 @@
       </v-flex>
     </v-layout>
   </v-container>
-
- 
 </template>
 
 <script>
 import axios from 'axios'
 import router from '../router'
 import PlayerList from './PlayerList'
-
 export default {
   data () {
     return {
@@ -59,10 +59,13 @@ export default {
       showGame: false,
       waktuStart: '',
       waktuSelesai: '',
-      isPlayerJoin: false,
-      isPlayerReady: false,
-      playerName: '',
-      playerAnswer: ''
+      isPlayerJoin: localStorage.hasOwnProperty('playerName'),
+      isPlayerReady: localStorage.hasOwnProperty('playerReady'),
+      playerName: localStorage.playerName,
+      playerAnswer: '',
+      failMessage: null,
+      playerJoinedAt: null,
+      isGameStarted: false
     }
   },
   components: {
@@ -73,6 +76,10 @@ export default {
       alldata: {
         source: this.$fbasedb.ref('wordrace'),
         anArray: true
+      },
+      currentWord: {
+        source: this.$fbasedb.ref('randomword'),
+        asObject: true
       }
     }
   },
@@ -117,41 +124,56 @@ export default {
       router.push({name : "ResultPage"})
     },
     playerJoin () {
-      console.log('player Join', this.playerName, this.playerAnswer)
-      this.$fbasedb.ref('wordrace').child(`players-${this.playerName}`).set({
-        name: this.playerName,
-        answer: null,
-        isPlayerReady: false,
-        poin: 0
-      })
-      this.isPlayerJoin = true
+      if ((this.playerName === undefined) || (this.playerName.trim() === '')) {
+        this.failMessage = 'Enter name to join..'
+        this.playerName = ''
+      } else {
+        console.log('player Join', this.playerName, this.playerAnswer)
+        this.$fbasedb.ref('wordrace').child(`players-${this.playerName}`).set({
+          name: this.playerName,
+          answer: null,
+          isPlayerReady: false,
+          joinedAt: (new Date()).toISOString(),
+          poin: 0
+        })
+
+        localStorage.setItem('playerName', this.playerName)
+        this.isPlayerJoin = true
+        this.playerJoinedAt = (new Date()).toISOString()
+      }
     },
     playerUnJoin () {
       console.log('player unjoin', this.playerName, this.playerAnswer)
       this.$fbasedb.ref('wordrace').child(`players-${this.playerName}`).remove()
       this.isPlayerJoin = false
       this.isPlayerReady = false
+      localStorage.removeItem('playerName')
     },
     playerReady () {
       this.$fbasedb.ref('wordrace').child(`players-${this.playerName}`).set({
         name: this.playerName,
         answer: null,
         poin: 0,
+        joinedAt: this.playerJoinedAt,
         isPlayerReady: true
       })
+      localStorage.setItem('playerReady', true)
       this.isPlayerReady = true
+      this.getNewText()
     },
     playerUnReady () {
       this.$fbasedb.ref('wordrace').child(`players-${this.playerName}`).set({
         name: this.playerName,
         answer: null,
         poin: 0,
+        joinedAt: this.playerJoinedAt,
         isPlayerReady: false
       })
       this.isPlayerReady = false
+      localStorage.removeItem('playerReady')
     },
     checkAnswer () {
-      if (this.text === this.playerAnswer) {
+      if (this.currentWord.word === this.playerAnswer) {
         console.log('answer matched')
         this.$fbasedb.ref(`wordrace/players-${this.playerName}`).once('value')
         .then((snapshot) => {
@@ -167,16 +189,38 @@ export default {
         })
       }
     },
+    startGame () {
+      console.log('game started')
+    },
     getNewText () {
-      let dataWord = this
+      console.log('get new text')
+      let inithis = this
       axios.get('http://api.wordnik.com/v4/words.json/randomWords?hasDictionaryDef=true&minCorpusCount=0&minLength=5&maxLength=15&limit=1&api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5')
       .then(function (result) {
-        dataWord.text = result.data[0].word
+        console.log('>>>>>>>>>', result)
+        inithis.$fbasedb.ref('randomword').set({
+          word: result.data[0].word.toLowerCase()
+        })
       })
     }
   },
+  computed: {
+    isAllReady () {
+      if (this.alldata) {
+        let somePlayerNotReady = this.alldata.some(element => {
+          return element.isPlayerReady === false
+        })
+        return !somePlayerNotReady
+      } else {
+        return false
+      }
+    }
+  },
   created () {
-    this.getNewText()
+    this.$fbasedb.ref('wordrace').on('value', (snapshot) => {
+      console.log('HIHIHI ', snapshot.val())
+      console.log(this.isAllReady)
+    })
   }
 }
 </script>

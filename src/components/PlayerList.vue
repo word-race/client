@@ -1,9 +1,10 @@
 <template>
 <div>
   <v-list-tile>
-    <v-layout justify-center>
+    <v-layout justify-center align-center>
       <v-flex md2 sm3 xs3>
-        <b>{{player.name}}</b>
+        <b>{{player.name}}</b> <br>
+        <span class="caption">{{timeJoined}}</span>
       </v-flex>
       <v-spacer></v-spacer>
       <v-flex md2 sm3 xs3>
@@ -28,7 +29,13 @@
 
 <script>
 export default {
-  props: ['player']
+  props: ['player'],
+  computed: {
+    timeJoined () {
+      let date = new Date(this.player.joinedAt)
+      return date.toTimeString()
+    }
+  }
 }
 </script>
 
