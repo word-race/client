@@ -6,15 +6,12 @@
       <v-flex>Indicator </v-flex>
       <v-flex> <h1 class="display-3">{{currentWord.word}}</h1></v-flex>
       <v-flex>
-        <h2><button type="button" name="button" @click="timer()">START</button></h2>
+        <v-btn round color="blue" @click="timer()" style="color: white">Count Down</v-btn>
+
           <div v-if="show">
-            <h2>Game Start in . . . {{ waktu }}</h2>
+            <h3>Game Start in . . . {{ waktu }}</h3>
           </div>
-          <div class="right" v-if="showGame">
-            <h2 v-if="waktu == 0">{{ selesai }}</h2>
-            <h1>{{ waktuStart }}</h1>
-            <h1>{{waktuSelesai}}</h1>
-          </div>
+
       </v-flex>
     </v-layout>
     <v-layout>
@@ -42,6 +39,11 @@
         </v-list>
       </v-flex>
     </v-layout>
+    <div v-if="showGame">
+      <h2>{{ selesai }}</h2>
+      <h1 style="font-size: 90px">{{ waktuStart }}</h1>
+      <h1>{{ waktuSelesai }}</h1>
+    </div>
   </v-container>
 </template>
 
@@ -188,8 +190,43 @@ export default {
       }
     },
     startGame () {
-      console.log('game started')
+      this.showGame   = true;
+      this.show = false;
+      const Timer     = require('tiny-timer');
+      let timerStart  = new Timer();
+      let timeStart   = timerStart.start(60000);
+
+      timerStart.on('tick', (ms) => {
+        this.waktuStart = (Math.floor(ms) / 1000).toFixed()
+        console.log('tick', (Math.floor(ms) / 1000).toFixed())
+        if(this.waktuStart == 50) {
+          this.waktuSelesai = "C'mon ! Try Harder !"
+        } else if(this.waktuStart == 40) {
+          this.waktuSelesai = 'You Can Do It !'
+        } else if(this.waktuStart == 30) {
+          this.waktuSelesai = "If you never say no, you'll never say yes"
+        } else if(this.waktuStart == 20) {
+          this.waktuSelesai = 'Ganbatte !'
+        } else if(this.waktuStart == 10) {
+          this.waktuSelesai = "Ten Seconds Left Man, C'mon !"
+        } else if(this.waktuStart == 3) {
+          this.waktuSelesai = "Three !"
+        } else if(this.waktuStart == 2) {
+          this.waktuSelesai = "Two !"
+        } else if(this.waktuStart == 1) {
+          this.waktuSelesai = "One !"
+        }
+      })
+        timerStart.on('done', () => {
+          this.waktuSelesai = "Time's Up ! Game Over !"
+          this.timeout();
+        })
     },
+
+    timeout(){
+      router.push({name : "ResultPage"})
+    },
+
     getNewText () {
       console.log('get new text')
       let inithis = this
